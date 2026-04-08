@@ -46,16 +46,21 @@ public class OpenSkyTokenService : IOpenSkyTokenService
     {
         var client = this._httpClientFactory.CreateClient();  //Create the HTTP client -- did not inject a typed Client becuase this class is a singleton
 
-        // Set the content type and the content of the request
-        client.DefaultRequestHeaders.Add("Content-Type", "application/x-www-form-urlencoded");
-        var content = new FormUrlEncodedContent(new Dictionary<string, string>
+        // create the request object
+        var request = new HttpRequestMessage(HttpMethod.Post, this._config["ExternalURLs:OpenSkyAuth"] + "auth/realms/opensky-network/protocol/openid-connect/token");
+
+          // Set the content type and the content of the request
+        //request.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
+
+        //set the body of the request
+        request.Content = new FormUrlEncodedContent(new Dictionary<string, string>
         {
             { "grant_type", "client_credentials" },
             { "client_id", this._config["OpenSky:ClientID"] ?? "" },
             { "client_secret", this._config["OpenSky:ClientSecret"] ?? "" }
         });
         // Send the request
-        var response = await client.PostAsync(this._config["ExternalURLs:OpenSkyAuth"] + "auth/realms/opensky-network/protocol/openid-connect/token", content); 
+        var response = await client.SendAsync(request); 
         // Handle the response -- if the response is successful, we will return the token
         if(response.IsSuccessStatusCode)
         {
@@ -70,7 +75,8 @@ public class OpenSkyTokenService : IOpenSkyTokenService
             var jwt = handler.ReadJwtToken(tokenString);
             this.setAccessToken(jwt);  // Set the token in the OpenSkyTokenService
             return true;
-        }       
+        } 
+        Console.WriteLine("HTTP Response " + response.ToString());     
         return false;  // Return false if the response is not successful
     }
 

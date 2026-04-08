@@ -1,7 +1,7 @@
 /* Interface for the Emissions Calculator Utlity Service 
 Will be used to calculate:
 - Great Circle Distance
-- Elevation Change
+- Altitude delta flown (end − start, meters)
 - Emission Amount
 
 */
@@ -11,7 +11,8 @@ namespace Emissions.Services;
 public interface IEmissionsCalculatorService
 {
 
-    float CalculateGreatCircleDistance(float latitude1, float longitude1, float latitude2, float longitude2);
-    float CalculateElevationChange(float latitude1, float longitude1, float latitude2, float longitude2);
-    float CalculateEmissionAmount(float greatCircleDistance, float elevationChange);
+    float CalculateGreatCircleDistance(double latitude1, double longitude1, double latitude2, double longitude2);
+    /// <summary>Altitude change flown in meters: <paramref name="altitudeMetersEnd"/> − <paramref name="altitudeMetersStart"/>.</summary>
+    float CalculateElevationChange(double altitudeMetersStart, double altitudeMetersEnd);
+    float CalculateEmissionAmount(double greatCircleDistance, double elevationChange);
 }

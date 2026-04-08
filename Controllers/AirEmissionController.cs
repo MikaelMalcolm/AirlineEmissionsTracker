@@ -15,15 +15,15 @@ public class AirEmissionController : Controller
         this._emissionsOrchestrator = emissionsOrchestrator;
     }
 
-    [HttpGet("[action]")]
+    [HttpGet]
     public async Task<IActionResult> Index()
     {
         OpenSkyStateVectorDTO openSkyRequest = new OpenSkyStateVectorDTO
         {
             Lamin = 43.5655833,
-            Lomin = -79.0993611,
+            Lomin = -79.6763555,
             Lamax = 43.8754583,
-            Lomax = -79.6763555,
+            Lomax = -79.0993611, //
             Extended = true
         };
 

@@ -9,5 +9,5 @@ public interface IOpenSkyTokenService
     bool isAccessTokenValid();
     void setAccessToken(JwtSecurityToken accessToken);
     Task<bool> refreshAccessToken();
-    Task<JwtSecurityToken?> getOpenSkyJWT();
-}
+    Task<JwtSecurityToken> getOpenSkyJWT(); 
+} 

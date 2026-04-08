@@ -56,6 +56,8 @@ public class OpenSkyService: IOpenSkyService
 
         var response = await this._httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
+        string rawResponse = await response.Content.ReadAsStringAsync();
+        Console.WriteLine("Raw Response: + " + rawResponse);
         var result = await response.Content.ReadFromJsonAsync<OpenSkyStateVectorResponseDTO>();
         return result ?? throw new InvalidOperationException("OpenSky returned an empty body.");
     }

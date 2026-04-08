@@ -11,4 +11,12 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.3.1" />
   </ItemGroup>
 
+  <!-- Test project lives under this folder; exclude it from the web app's compile glob. -->
+  <ItemGroup>
+    <Compile Remove="Emissions.Tests/**" />
+    <Content Remove="Emissions.Tests/**" />
+    <EmbeddedResource Remove="Emissions.Tests/**" />
+    <None Remove="Emissions.Tests/**" />
+  </ItemGroup>
+
 </Project>

@@ -24,11 +24,10 @@ if (!app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.UseExceptionHandler("/Home/Error");
+    app.UseHttpsRedirection();
 
 }
 app.UseRouting();
-
-app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
