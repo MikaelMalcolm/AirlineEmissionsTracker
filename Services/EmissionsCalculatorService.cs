@@ -14,15 +14,15 @@ public class EmissionsCalculatorService : IEmissionsCalculatorService
 {
     public float CalculateGreatCircleDistance(float latitude1, float longitude1, float latitude2, float longitude2)
     {
-        return 0.0;
+        return 0.0f;
     }
     public float CalculateElevationChange(float latitude1, float longitude1, float latitude2, float longitude2)
     {
-         return 0.0;
+         return 0.0f;
     }
     public float CalculateEmissionAmount(float greatCircleDistance, float elevationChange)
     {
-         return 0.0;
+         return 0.0f;
     } 
 }
 

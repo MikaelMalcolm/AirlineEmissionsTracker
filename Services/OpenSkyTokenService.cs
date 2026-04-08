@@ -10,21 +10,21 @@ We will need to handle the case where the token is not valid -- we will need to 
 We will need to handle the case where the token is not valid -- we will need to refresh the token.
  **/
 
-namespace Emissions.Services;
-
 using System.IdentityModel.Tokens.Jwt;
+using System.Text.Json;
+
+namespace Emissions.Services;
 
 public class OpenSkyTokenService : IOpenSkyTokenService
 {   
     private readonly IConfiguration _config;
-    private JwtSecurityToken OpenSkyJWT;
+    private JwtSecurityToken? OpenSkyJWT;
     private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
     private readonly IHttpClientFactory _httpClientFactory;
     
     public OpenSkyTokenService(IConfiguration config, IHttpClientFactory httpClientFactory)
     {
         this._config = config;
-        this.accessToken = string.Empty;
         this.OpenSkyJWT = null;
         this._httpClientFactory = httpClientFactory;
     }
@@ -42,7 +42,7 @@ public class OpenSkyTokenService : IOpenSkyTokenService
         return true;
     }
 
-    public async Task<bool> refreshAccessToken(IOpenSkyAuthService openSkyAuthService)
+    public async Task<bool> refreshAccessToken()
     {
         var client = this._httpClientFactory.CreateClient();  //Create the HTTP client -- did not inject a typed Client becuase this class is a singleton
 
@@ -51,8 +51,8 @@ public class OpenSkyTokenService : IOpenSkyTokenService
         var content = new FormUrlEncodedContent(new Dictionary<string, string>
         {
             { "grant_type", "client_credentials" },
-            { "client_id", this._config["OpenSky:ClientID"] },
-            { "client_secret", this._config["OpenSky:ClientSecret"] }
+            { "client_id", this._config["OpenSky:ClientID"] ?? "" },
+            { "client_secret", this._config["OpenSky:ClientSecret"] ?? "" }
         });
         // Send the request
         var response = await client.PostAsync(this._config["ExternalURLs:OpenSkyAuth"] + "auth/realms/opensky-network/protocol/openid-connect/token", content); 
@@ -60,24 +60,30 @@ public class OpenSkyTokenService : IOpenSkyTokenService
         if(response.IsSuccessStatusCode)
         {
             var responseContent = await response.Content.ReadAsStringAsync();  // Read the response content
-            var jwt = new JwtSecurityToken(responseContent);  // Create the JWT token
+            using var doc = JsonDocument.Parse(responseContent);
+            if (!doc.RootElement.TryGetProperty("access_token", out var tokenEl))
+                return false;
+            var tokenString = tokenEl.GetString();
+            if (string.IsNullOrEmpty(tokenString))
+                return false;
+            var handler = new JwtSecurityTokenHandler();
+            var jwt = handler.ReadJwtToken(tokenString);
             this.setAccessToken(jwt);  // Set the token in the OpenSkyTokenService
             return true;
         }       
         return false;  // Return false if the response is not successful
     }
 
-    private void setAccessToken(JwtSecurityToken accessToken)
+    public void setAccessToken(JwtSecurityToken accessToken)
     {
         this.OpenSkyJWT = accessToken;
     }
 
-    public JwtSecurityToken getOpenSkyJWT()
+    public async Task<JwtSecurityToken?> getOpenSkyJWT()
     {
         if(!this.isAccessTokenValid())
         {
-          
-            bool success = await this.refreshAccessToken(openSkyAuthService);
+            bool success = await this.refreshAccessToken();
             if(success)
             {
                 return this.OpenSkyJWT;
@@ -86,8 +92,6 @@ public class OpenSkyTokenService : IOpenSkyTokenService
             {
                 return null;
             }
-           
-        
         }
         return this.OpenSkyJWT;
     }

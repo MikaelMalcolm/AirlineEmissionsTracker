@@ -2,6 +2,7 @@
 That's it really. LOL.
 **/
 
+using Emissions.Models.DTOs;
 
 namespace Emissions.Services;
 

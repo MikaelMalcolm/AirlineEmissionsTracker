@@ -2,6 +2,12 @@
 Implements the IOpenSkyService Interface
 **/
 
+using System.Globalization;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using Emissions.Models.DTOs;
+using Microsoft.AspNetCore.WebUtilities;
+
 namespace Emissions.Services;
 
 public class OpenSkyService: IOpenSkyService
@@ -10,41 +16,48 @@ public class OpenSkyService: IOpenSkyService
     private readonly IOpenSkyTokenService _tokenService;
     private readonly IConfiguration _config;
     private readonly HttpClient _httpClient;
-    private string _baseURL;
-
     
     public OpenSkyService(IConfiguration config, IOpenSkyTokenService tokenService, HttpClient httpClient)
     {
         this._config = config;
         this._tokenService = tokenService;
         this._httpClient = httpClient;
-        this._httpClient.BaseAddress = new Uri(this._config["ExternalURLs:OpenSkyAPI"] );
-
+        var baseUrl = this._config["ExternalURLs:OpenSkyAPI"];
+        if (!string.IsNullOrEmpty(baseUrl))
+            this._httpClient.BaseAddress = new Uri(baseUrl);
     }
 
-    public Task<OpenSkyStateVectorResponseDTO> GetStateVectors(OpenSkyStateVectorDTO OpenSkyRequest)
+    public async Task<OpenSkyStateVectorResponseDTO> GetStateVectors(OpenSkyStateVectorDTO openSkyRequest)
     {
-        var accessToken = this._tokenService.getOpenSkyJWT();
-        this._httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + accessToken.ToString());
+        var accessToken = await this._tokenService.getOpenSkyJWT();
+        if (accessToken?.RawData is null)
+            throw new InvalidOperationException("OpenSky access token is not available.");
 
-        var builder = new UriBuilder(this._config["ExternalURLs:OpenSkyAPI"] + "states/all");
-        var query = HttpUtility.ParseQueryString(builder.Query);
+        var basePath = "states/all";
+        var query = new Dictionary<string, string?>();
+        if (openSkyRequest.Lamin.HasValue)
+            query["lamin"] = openSkyRequest.Lamin.Value.ToString(CultureInfo.InvariantCulture);
+        if (openSkyRequest.Lomin.HasValue)
+            query["lomin"] = openSkyRequest.Lomin.Value.ToString(CultureInfo.InvariantCulture);
+        if (openSkyRequest.Lamax.HasValue)
+            query["lamax"] = openSkyRequest.Lamax.Value.ToString(CultureInfo.InvariantCulture);
+        if (openSkyRequest.Lomax.HasValue)
+            query["lomax"] = openSkyRequest.Lomax.Value.ToString(CultureInfo.InvariantCulture);
+        if (!string.IsNullOrEmpty(openSkyRequest.Icao24))
+            query["icao24"] = openSkyRequest.Icao24;
+        if (openSkyRequest.Time.HasValue)
+            query["time"] = openSkyRequest.Time.Value.ToString(CultureInfo.InvariantCulture);
+        if (openSkyRequest.Extended.HasValue)
+            query["extended"] = openSkyRequest.Extended.Value ? "1" : "0";
 
-        query["lamin"] = "123";
-        query["lomin"] = "books";
-        query["lamax"] = "123";
-        query["lomax"] = "books";
-        query["icao24"] = "";
-        query["time"] = "";
-        query["extended"] = "";
+        var relative = QueryHelpers.AddQueryString(basePath, query);
+        var request = new HttpRequestMessage(HttpMethod.Get, relative);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken.RawData);
 
-
-        builder.Query = query.ToString();
-        string url = builder.ToString();
-
-
-        var response = await this._httpClient.GetFromJSONAsync<OpenSkyStateVectorResponseDTO>(url);
-        
+        var response = await this._httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<OpenSkyStateVectorResponseDTO>();
+        return result ?? throw new InvalidOperationException("OpenSky returned an empty body.");
     }
 
 
