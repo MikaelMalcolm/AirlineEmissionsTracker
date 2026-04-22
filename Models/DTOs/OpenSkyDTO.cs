@@ -2,6 +2,7 @@
 **/
 
 using System.Text.Json.Serialization;
+using Emissions.Models.CustomJSONConverters;
 
 namespace Emissions.Models.DTOs;
 
@@ -20,7 +21,10 @@ public record OpenSkyStateVectorDTO
 public record OpenSkyStateVectorResponseDTO
 {
     public int time { get; init; }
-    public List<OpenSkyStateVectorDTO> states { get; init; } = [];
+    //public List<OpenSkyStateVectorDTO> states { get; init; } = [];
+    
+    [JsonConverter(typeof(OpenSkyVectorJSONConverter))]
+    public List<OpenSkyVectorInfoDTO> states { get; init; } = [];
 }
 
 
@@ -28,6 +32,8 @@ public record OpenSkyVectorArrayDTO
 {
     public List<OpenSkyVectorInfoDTO> vectors { get; init; } = [];
 }
+
+
 
 /// <summary>One OpenSky state vector row (indices 0–17). See OpenSky REST API state vector table.</summary>
 public record OpenSkyVectorInfoDTO

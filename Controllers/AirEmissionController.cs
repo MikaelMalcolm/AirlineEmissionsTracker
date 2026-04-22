@@ -1,9 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Emissions.Models;
 using Emissions.Models.DTOs;
-using Emissions.Services;
-
-namespace Emissions.Controllers;
+using Emissions.Services;    
 
 [Route("api/v1/Emissions")]
 public class AirEmissionController : Controller
