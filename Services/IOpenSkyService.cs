@@ -9,4 +9,6 @@ namespace Emissions.Services;
 public interface IOpenSkyService
 {
     Task<OpenSkyStateVectorResponseDTO> GetStateVectors(OpenSkyStateVectorDTO OpenSkyRequest);
+    Task<List<OpenSkyStateVectorResponseDTO> GetBatchStateVectors(OpenSkyStateVectorDTO OpenSkyRequest, int minutesInPast = 60, int intervalLength = 15);
+
 }

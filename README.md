@@ -17,7 +17,9 @@ I am currently building this in phases. This checklist represents the engineerin
 ### Phase 1: Data Ingestion & Foundation 🏗️
 - [x] **Project Initialization:** Clean Architecture setup with separate Projects for Core, Infrastructure, and API.
 - [x] **OpenSky Integration:** Successful connection to the OpenSky Network REST API.
-- [x] **High-Performance Serialization:** Implementation of a custom `JsonConverter<T>` using `JsonDocument` to map heterogeneous positional arrays into strongly-typed C# Records.
+- [x] **High-Performance Deserialization:** Implementation of a custom `JsonConverter<T>` using `JsonDocument` to map heterogeneous positional arrays into strongly-typed C# Records.
+- [ ] **Batch OpenSky Requests:** Implementing the ability to make batch OpenSky Requests, in order to get a list of "waypoints" for flight paths, resulting in more accurate calculations
+- [ ] **Implement Write for Serialization:**: The OpenSky Service will eventually become it's own stand-alone library. Implement Write for Custom Converter so the public can use this library
 - [ ] **State Vector Refinement:** Handling edge cases for null/missing telemetry data (e.g., barometric altitude vs. geometric altitude).
 
 ### Phase 2: Domain Logic & ETL 🧪
@@ -26,17 +28,17 @@ I am currently building this in phases. This checklist represents the engineerin
 - [ ] **In-Memory Cache:** Utilizing `IMemoryCache` to reduce API redundant calls and manage stateful flight paths.
 
 ## Phase 3: Front-End Visualization
-- [] **Implement Map-Based UI:** Implement Map Interface in React where users can navigate to all supported geographical areas
-- [] **Add Heat Maps:** Add a "Heat-Map" Layer on top of the Map Interface to quickly indicate CO2 levels of that sector
-- [] **Add detailed data section:** Add section where users can see a more detailed breakdown of the CO2 emissions of a particular area
+- [ ] **Implement Map-Based UI:** Implement Map Interface in React where users can navigate to all supported geographical areas
+- [ ] **Add Heat Maps:** Add a "Heat-Map" Layer on top of the Map Interface to quickly indicate CO2 levels of that sector
+- [ ] **Add detailed data section:** Add section where users can see a more detailed breakdown of the CO2 emissions of a particular area
 
 
-### Phase 3: Scalability & Performance (The "Senior" Layer) ⚡
+### Phase 4: Scalability & Performance (The "Senior" Layer) ⚡
 - [ ] **Async Streaming:** Refactoring the ingestion layer to use `IAsyncEnumerable` for real-time data streaming.
 - [ ] **Source Generation:** Moving from reflection-based JSON handling to .NET Source Generators for zero-allocation performance.
 - [ ] **Database Persistence:** Implementing an EF Core / PostgreSQL layer to store historical flight data for trend analysis.
 
-### Phase 4: BCI Integration Concepts 🧠
+### Phase 5: BCI Integration Concepts 🧠
 - [ ] **Signal Mapping:** Exploring how flight path "noise" can be visually mapped in a way that mimics EEG signal processing.
 - [ ] **Neural Visualization:** Developing a UI (React/Three.js) that visualizes data density, similar to a brain-activity heat map.
 
